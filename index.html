@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clothing Brand Index</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f0eb;
+      --surface: #ffffff;
+      --border: #e0d9d0;
+      --accent-street: #ff3d00;
+      --accent-luxury: #8b6914;
+      --text: #1a1a1a;
+      --muted: #999;
+      --tag-street: #fff0ed;
+      --tag-luxury: #fdf6e3;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Instrument Sans', sans-serif;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* Hero */
+    .hero {
+      background: #111;
+      padding: 60px 40px 50px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: 'INDEX';
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 200px;
+      color: rgba(255,255,255,0.03);
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .hero-inner { max-width: 1000px; margin: 0 auto; }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(56px, 10vw, 110px);
+      line-height: 0.9;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 span { color: #ff3d00; }
+
+    .hero-meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta p {
+      color: #666;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .hero-meta .pill {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #aaa;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+    }
+
+    /* Controls */
+    .controls {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 40px 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 16px 10px 40px;
+      border-radius: 8px;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap input:focus { border-color: #aaa; }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    .filter-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .fbt {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: 'Instrument Sans', sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .fbt:hover { border-color: #bbb; color: var(--text); }
+    .fbt.active-all { background: #111; color: #fff; border-color: #111; }
+    .fbt.active-street { background: var(--accent-street); color: #fff; border-color: var(--accent-street); }
+    .fbt.active-luxury { background: var(--accent-luxury); color: #fff; border-color: var(--accent-luxury); }
+
+    /* Sort bar */
+    .sort-bar {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 40px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .count-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .count-label strong { color: var(--text); }
+
+    /* Table */
+    .table-wrap {
+      max-width: 1000px;
+      margin: 0 auto 60px;
+      padding: 0 40px;
+    }
+
+    .brand-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .brand-table thead tr {
+      border-bottom: 2px solid var(--border);
+    }
+
+    .brand-table thead th {
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 12px 12px;
+      font-weight: 500;
+    }
+
+    .brand-table thead th:first-child { padding-left: 0; }
+
+    .brand-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .brand-table tbody tr:hover { background: rgba(0,0,0,0.02); }
+    .brand-table tbody tr.hidden { display: none; }
+
+    .brand-table tbody td {
+      padding: 16px 12px;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .brand-table tbody td:first-child { padding-left: 0; }
+
+    .td-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      color: var(--muted);
+      width: 36px;
+    }
+
+    .td-name { font-weight: 600; font-size: 15px; }
+    .td-sub { font-size: 12px; color: var(--muted); font-weight: 300; margin-top: 2px; }
+
+    .td-tag {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .tag-streetwear { background: var(--tag-street); color: var(--accent-street); }
+    .tag-luxury { background: var(--tag-luxury); color: var(--accent-luxury); }
+
+    .td-price { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .td-origin { font-size: 13px; color: var(--muted); }
+    .td-tier {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 14px;
+      display: none;
+    }
+
+    footer {
+      max-width: 1000px;
+      margin: 0 auto 40px;
+      padding: 0 40px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 40px 20px; }
+      .controls, .sort-bar, .table-wrap, footer { padding-left: 20px; padding-right: 20px; }
+      .td-price, .td-origin { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>Clothing<br><span>Brand</span> Index</h1>
+    <div class="hero-meta">
+      <p>30 Brands Listed</p>
+      <div class="pill">Streetwear &amp; Luxury</div>
+      <div class="pill">2026 Edition</div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Search brands..."/>
+  </div>
+  <div class="filter-btns">
+    <button class="fbt active-all" onclick="filter('all', this)">All</button>
+    <button class="fbt" onclick="filter('Streetwear', this)">Streetwear</button>
+    <button class="fbt" onclick="filter('Luxury', this)">Luxury</button>
+  </div>
+</div>
+
+<div class="sort-bar">
+  <p class="count-label">Showing <strong id="countLabel">30</strong> brands</p>
+</div>
+
+<div class="table-wrap">
+  <table class="brand-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Brand</th>
+        <th>Category</th>
+        <th>Price Range</th>
+        <th>Origin</th>
+        <th>Tier</th>
+      </tr>
+    </thead>
+    <tbody id="brandTable">
+      <!-- Streetwear -->
+      <tr data-cat="Streetwear" data-name="supreme">
+        <td class="td-num">01</td>
+        <td><div class="td-name">Supreme</div><div class="td-sub">NYC skate culture, iconic box logo drops</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$60 – $300+</td>
+        <td class="td-origin">🇺🇸 USA</td>
+        <td class="td-tier" style="color:#ff3d00">Hype</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="stussy">
+        <td class="td-num">02</td>
+        <td><div class="td-name">Stüssy</div><div class="td-sub">Original streetwear, relaxed graphics</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$50 – $200</td>
+        <td class="td-origin">🇺🇸 USA</td>
+        <td class="td-tier" style="color:#ff3d00">Classic</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="carhartt wip">
+        <td class="td-num">03</td>
+        <td><div class="td-name">Carhartt WIP</div><div class="td-sub">Workwear-inspired, durable essentials</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$50 – $250</td>
+        <td class="td-origin">🇩🇪 Germany</td>
+        <td class="td-tier" style="color:#ff3d00">Classic</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="palace">
+        <td class="td-num">04</td>
+        <td><div class="td-name">Palace</div><div class="td-sub">UK skate brand, global cult following</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$60 – $400</td>
+        <td class="td-origin">🇬🇧 UK</td>
+        <td class="td-tier" style="color:#ff3d00">Hype</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="a bathing ape bape">
+        <td class="td-num">05</td>
+        <td><div class="td-name">A Bathing Ape (BAPE)</div><div class="td-sub">Japanese streetwear, iconic camo prints</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$80 – $500</td>
+        <td class="td-origin">🇯🇵 Japan</td>
+        <td class="td-tier" style="color:#ff3d00">Classic</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="corteiz crtz">
+        <td class="td-num">06</td>
+        <td><div class="td-name">Corteiz (CRTZ)</div><div class="td-sub">London underground, global heat</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$60 – $250</td>
+        <td class="td-origin">🇬🇧 UK</td>
+        <td class="td-tier" style="color:#ff3d00">Trending</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="aimé leon dore ald">
+        <td class="td-num">07</td>
+        <td><div class="td-name">Aimé Leon Dore</div><div class="td-sub">NYC preppy-meets-street hybrid</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$80 – $400</td>
+        <td class="td-origin">🇺🇸 USA</td>
+        <td class="td-tier" style="color:#ff3d00">Trending</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="kith">
+        <td class="td-num">08</td>
+        <td><div class="td-name">Kith</div><div class="td-sub">Sport, prep &amp; street lifestyle brand</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$70 – $350</td>
+        <td class="td-origin">🇺🇸 USA</td>
+        <td class="td-tier" style="color:#ff3d00">Premium</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="off-white">
+        <td class="td-num">09</td>
+        <td><div class="td-name">Off-White</div><div class="td-sub">Virgil Abloh legacy, bold industrial branding</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$200 – $1,200</td>
+        <td class="td-origin">🇮🇹 Italy</td>
+        <td class="td-tier" style="color:#ff3d00">High-End</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="fear of god essentials fog">
+        <td class="td-num">10</td>
+        <td><div class="td-name">Fear of God Essentials</div><div class="td-sub">Elevated basics, neutral tones</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$60 – $250</td>
+        <td class="td-origin">🇺🇸 USA</td>
+        <td class="td-tier" style="color:#ff3d00">Premium</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="noah">
+        <td class="td-num">11</td>
+        <td><div class="td-name">Noah</div><div class="td-sub">Principled streetwear, ethical production</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$60 – $300</td>
+        <td class="td-origin">🇺🇸 USA</td>
+        <td class="td-tier" style="color:#ff3d00">Premium</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="wtaps">
+        <td class="td-num">12</td>
+        <td><div class="td-name">WTAPS</div><div class="td-sub">Japanese military-inspired streetwear</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$100 – $600</td>
+        <td class="td-origin">🇯🇵 Japan</td>
+        <td class="td-tier" style="color:#ff3d00">Premium</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="neighborhood">
+        <td class="td-num">13</td>
+        <td><div class="td-name">Neighborhood</div><div class="td-sub">Japanese biker-influenced streetwear</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$100 – $500</td>
+        <td class="td-origin">🇯🇵 Japan</td>
+        <td class="td-tier" style="color:#ff3d00">Classic</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="represent">
+        <td class="td-num">14</td>
+        <td><div class="td-name">Represent</div><div class="td-sub">Premium casual, clean British aesthetic</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$80 – $400</td>
+        <td class="td-origin">🇬🇧 UK</td>
+        <td class="td-tier" style="color:#ff3d00">Premium</td>
+      </tr>
+      <tr data-cat="Streetwear" data-name="rhude">
+        <td class="td-num">15</td>
+        <td><div class="td-name">Rhude</div><div class="td-sub">LA luxury streetwear, racing &amp; vintage vibes</div></td>
+        <td><span class="td-tag tag-streetwear">Streetwear</span></td>
+        <td class="td-price">$150 – $800</td>
+        <td class="td-origin">🇺🇸 USA</td>
+        <td class="td-tier" style="color:#ff3d00">High-End</td>
+      </tr>
+
+      <!-- Luxury -->
+      <tr data-cat="Luxury" data-name="louis vuitton lv">
+        <td class="td-num">16</td>
+        <td><div class="td-name">Louis Vuitton</div><div class="td-sub">French luxury house, iconic monogram</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$500 – $5,000+</td>
+        <td class="td-origin">🇫🇷 France</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="gucci">
+        <td class="td-num">17</td>
+        <td><div class="td-name">Gucci</div><div class="td-sub">Italian maximalist luxury, GG motif</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $4,000+</td>
+        <td class="td-origin">🇮🇹 Italy</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="prada">
+        <td class="td-num">18</td>
+        <td><div class="td-name">Prada</div><div class="td-sub">Milanese intellectual luxury, nylon classics</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $3,500+</td>
+        <td class="td-origin">🇮🇹 Italy</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="balenciaga">
+        <td class="td-num">19</td>
+        <td><div class="td-name">Balenciaga</div><div class="td-sub">Demna's deconstructed high-fashion</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $3,000+</td>
+        <td class="td-origin">🇫🇷 France</td>
+        <td class="td-tier" style="color:#8b6914">Avant-Garde</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="dior christian dior">
+        <td class="td-num">20</td>
+        <td><div class="td-name">Dior</div><div class="td-sub">Parisian elegance, New Look legacy</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$500 – $5,000+</td>
+        <td class="td-origin">🇫🇷 France</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="saint laurent ysl">
+        <td class="td-num">21</td>
+        <td><div class="td-name">Saint Laurent</div><div class="td-sub">Rock 'n' roll luxury, sleek Parisian edge</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $3,000+</td>
+        <td class="td-origin">🇫🇷 France</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="bottega veneta">
+        <td class="td-num">22</td>
+        <td><div class="td-name">Bottega Veneta</div><div class="td-sub">Quiet luxury, intrecciato weave mastery</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$500 – $5,000+</td>
+        <td class="td-origin">🇮🇹 Italy</td>
+        <td class="td-tier" style="color:#8b6914">Quiet Luxury</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="givenchy">
+        <td class="td-num">23</td>
+        <td><div class="td-name">Givenchy</div><div class="td-sub">Parisian couture, edgy modernity</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$300 – $2,500+</td>
+        <td class="td-origin">🇫🇷 France</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="burberry">
+        <td class="td-num">24</td>
+        <td><div class="td-name">Burberry</div><div class="td-sub">British heritage, iconic tartan check</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$300 – $2,500+</td>
+        <td class="td-origin">🇬🇧 UK</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="versace">
+        <td class="td-num">25</td>
+        <td><div class="td-name">Versace</div><div class="td-sub">Maximalist Italian glamour, Medusa icon</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $3,500+</td>
+        <td class="td-origin">🇮🇹 Italy</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="loewe">
+        <td class="td-num">26</td>
+        <td><div class="td-name">Loewe</div><div class="td-sub">Spanish craft house, artisan leather</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $4,000+</td>
+        <td class="td-origin">🇪🇸 Spain</td>
+        <td class="td-tier" style="color:#8b6914">Trending</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="celine">
+        <td class="td-num">27</td>
+        <td><div class="td-name">Celine</div><div class="td-sub">Minimalist Parisian luxury, clean lines</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $3,000+</td>
+        <td class="td-origin">🇫🇷 France</td>
+        <td class="td-tier" style="color:#8b6914">Quiet Luxury</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="moncler">
+        <td class="td-num">28</td>
+        <td><div class="td-name">Moncler</div><div class="td-sub">Luxury outerwear, premium down jackets</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$600 – $4,000+</td>
+        <td class="td-origin">🇮🇹 Italy</td>
+        <td class="td-tier" style="color:#8b6914">Premium</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="valentino">
+        <td class="td-num">29</td>
+        <td><div class="td-name">Valentino</div><div class="td-sub">Roman couture, Valentino Red signature</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$500 – $5,000+</td>
+        <td class="td-origin">🇮🇹 Italy</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+      <tr data-cat="Luxury" data-name="alexander mcqueen">
+        <td class="td-num">30</td>
+        <td><div class="td-name">Alexander McQueen</div><div class="td-sub">Dark romanticism, rebellious British tailoring</div></td>
+        <td><span class="td-tag tag-luxury">Luxury</span></td>
+        <td class="td-price">$400 – $3,500+</td>
+        <td class="td-origin">🇬🇧 UK</td>
+        <td class="td-tier" style="color:#8b6914">Heritage</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="no-results" id="noResults">No brands match your search.</div>
+</div>
+
+<footer>30 Brands · Streetwear &amp; Luxury · 2026 Edition</footer>
+
+<script>
+  let currentFilter = 'all';
+
+  function filter(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.fbt').forEach(b => {
+      b.className = 'fbt';
+    });
+    if (cat === 'all') btn.classList.add('active-all');
+    else if (cat === 'Streetwear') btn.classList.add('active-street');
+    else if (cat === 'Luxury') btn.classList.add('active-luxury');
+    applyFilters();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+  function applyFilters() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#brandTable tr');
+    let count = 0;
+    rows.forEach(row => {
+      const name = row.dataset.name || '';
+      const cat = row.dataset.cat || '';
+      const matchCat = currentFilter === 'all' || cat === currentFilter;
+      const matchSearch = name.includes(q);
+      if (matchCat && matchSearch) {
+        row.classList.remove('hidden');
+        count++;
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+    document.getElementById('countLabel').textContent = count;
+    document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>
